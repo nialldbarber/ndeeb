@@ -1,4 +1,4 @@
-import fs, { readFileSync } from 'fs'
+import { readdirSync, readFileSync } from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 
@@ -12,11 +12,10 @@ export type PostMetaData = {
 const postsDir = path.join(process.cwd(), 'src', 'posts')
 
 const getPostMetaData = (): PostMetaData[] => {
-  const files = fs.readdirSync(postsDir)
+  const files = readdirSync(postsDir)
   const markdownPosts = files.filter((file) => file.endsWith('.md'))
-
   const posts = markdownPosts.map((fileName) => {
-    const fileContents = fs.readFileSync(`${postsDir}/${fileName}`, 'utf8')
+    const fileContents = readFileSync(`${postsDir}/${fileName}`, 'utf8')
     const matterResult = matter(fileContents)
     return {
       title: matterResult.data.title,
@@ -25,7 +24,6 @@ const getPostMetaData = (): PostMetaData[] => {
       slug: fileName.replace('.md', ''),
     }
   })
-
   return posts
 }
 
