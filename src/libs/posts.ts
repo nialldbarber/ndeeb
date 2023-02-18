@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from 'fs'
-import path from 'path'
+import { join } from 'path'
 import matter from 'gray-matter'
 
 export type PostMetaData = {
@@ -9,7 +9,7 @@ export type PostMetaData = {
   slug: string
 }
 
-const postsDir = path.join(process.cwd(), 'src', 'posts')
+const postsDir = join(process.cwd(), 'src', 'posts')
 
 const getPostMetaData = (): PostMetaData[] => {
   const files = readdirSync(postsDir)
