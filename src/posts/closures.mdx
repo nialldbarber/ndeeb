@@ -25,7 +25,7 @@ A closure is a fancy term that refers to something that's actually fairly simple
 
 Anything declared in the higher watering can is available in the lower watering can. But! Anything declared in the lower watering can is not available in the higher one. A one way system that only flows downwards, if you will.
 
-![Closure](/static/images/closure.png)
+![Closure](https://raw.githubusercontent.com/nialldbarber/ndb-blog/master/public/static/images/closure.png)
 
 Let's take a deep dive into the code above. The variable `message` with the value of `'pickles'` is created in `outerFn()`. Another function is created within `outerFn()` called `innerFn()` which just returns `message`. But how does it have access to it? Does it work the other way around? Does `outerFn()` have access to a hypothetical variable declared in `innerFn()`?
 
@@ -139,7 +139,7 @@ The answer depends on what part of the code is being run. If we're outside; in t
 
 ## A visualisation of encapsulation
 
-![Context](/static/images/context.png)
+![Context](https://raw.githubusercontent.com/nialldbarber/ndb-blog/master/public/static/images/context.png)
 
 ### Persistence
 
@@ -180,7 +180,7 @@ A good use case for this is caching values, or memoization. Memoization is the t
 
 ## A visualisation of memoization
 
-![Context](/static/images/memo.png)
+![Context](https://raw.githubusercontent.com/nialldbarber/ndb-blog/master/public/static/images/memo.png)
 
 In this example, a calculator acts as the memoized function. It _stores_ the results of values passed to it. If it's called with inputs that it's received before, it doesn't do any computation and just returns the stored value.
 

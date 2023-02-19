@@ -7,19 +7,19 @@ type RootLayoutProps = {
   children: React.ReactNode
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
-  return (
-    <html lang="en">
-      {/*
-        <head /> will contain the components returned by the nearest parent
-        head.tsx. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
-      */}
-      <head />
-      <body>
-        <Header />
-        {children}
-        <Footer />
-      </body>
-    </html>
-  )
-}
+const RootLayout = ({ children }: RootLayoutProps) => (
+  <html lang="en">
+    <head />
+    <body>
+      <Header />
+      {children}
+      <Footer />
+    </body>
+  </html>
+)
+
+export const PageLayout = ({ children }: RootLayoutProps) => (
+  <div className="mt-20 mb-10 px-10">{children}</div>
+)
+
+export default RootLayout
