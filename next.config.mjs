@@ -1,11 +1,16 @@
 import createMDX from '@next/mdx'
+import remarkGfm from 'remark-gfm'
+import remarkHtml from 'remark-html'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+
 import rehypeStringify from 'rehype-stringify'
 import rehypeHighlight from 'rehype-highlight'
 
 const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [],
+    remarkPlugins: [remarkGfm, remarkHtml, remarkParse, remarkRehype],
     rehypePlugins: [rehypeHighlight, rehypeStringify],
   },
 })
