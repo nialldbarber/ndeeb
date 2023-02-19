@@ -1,0 +1,42 @@
+---
+title: Git add wildcard
+date: '2022-01-06'
+tags: ['git']
+subtitle: Quick tip for staging your git files
+---
+
+Did you know when staging your files for Git, you can use the wildcard to target specific directories/files?
+
+### An example
+
+Let's say you have these files ready to be committed:
+
+```bash
+modified:   app/features/cart/index.ts
+modified:   app/features/cart/cart.test.ts
+modified:   app/features/cart/cart.module.css
+modified:   public/assets/favicon.ico
+modified:   README.md
+```
+
+You only want to `add` and `commit` the files in `app/features/cart`. You could opt to add them individually, or maybe you could just YOLO it and and run `git add .`. The other and more preferable option would be to use the wildcard symbol and target the files in `/cart`:
+
+```bash
+git add app/features/cart/*
+```
+
+This isn't just for directories, you could also target files that have different extensions. Let's say we just want to target all file names that contain `app/components/header/header`:
+
+```bash
+modified:   app/components/header/header.ts
+modified:   app/components/header/header.test.ts
+modified:   app/components/header/header.module.css
+modified:   app/constants/api/index.ts
+modified:   .gitignore
+```
+
+We'd just need to place the wildcard symbol before the final dot:
+
+```bash
+git add app/components/header/header.*
+```

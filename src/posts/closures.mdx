@@ -1,0 +1,296 @@
+---
+title: Closures
+date: '2021-12-14'
+tags: ['javascript']
+subtitle: What is a closure in JavaScript? An explanation with examples
+---
+
+## TL;DR, show me the code!
+
+```jsx
+function outerFn() {
+  let message = 'pickles'
+  function innerFn() {
+    return message // <- this function is a closure
+  }
+  return innerFn()
+}
+
+outerFn() // 'pickles'
+```
+
+A closure is a fancy term that refers to something that's actually fairly simple. A closure is a function that has been wrapped, or _enclosed_ by another function. The significance of this is that a variable declared in the outer function will also be accessible in the inner function.
+
+## A visual explanation of a closure
+
+Anything declared in the higher watering can is available in the lower watering can. But! Anything declared in the lower watering can is not available in the higher one. A one way system that only flows downwards, if you will.
+
+![Closure](/static/images/closure.png)
+
+Let's take a deep dive into the code above. The variable `message` with the value of `'pickles'` is created in `outerFn()`. Another function is created within `outerFn()` called `innerFn()` which just returns `message`. But how does it have access to it? Does it work the other way around? Does `outerFn()` have access to a hypothetical variable declared in `innerFn()`?
+
+Let's try! Does the code below work? What will the output be?
+
+```jsx
+function outerFn() {
+  function innerFn() {
+    let breakfast = 'porridge'
+  }
+  return breakfast
+}
+
+outerFn() // ???
+```
+
+Take some time to think about it, go through each line and take a guess.
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+Have you made a guess 👀 ?
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+It wouldn't work because `breakfast` is not defined.
+
+```jsx
+function outerFn() {
+  function innerFn() {
+    let breakfast = 'porridge'
+  }
+  return breakfast
+}
+
+outerFn() // Uncaught ReferenceError: breakfast is not defined
+```
+
+Why is this? Well, the way closures work in JavaScript means that a function has access to its outer lexical scope, but this only works in one direction; i.e. from the inside out. In the example above, the variable `breakfast` is declared in the `innerFn()` function but is called in the function outside it. `outerFn()` cannot look inside it's nested functions, so to the outer function, `breakfast` doesn't exist.
+
+## Use cases
+
+Ok so now we know what a closure is, but why are they useful?
+
+### Encapsulation
+
+Let's start with the big one; encapsulation. With closures, we can keep data closed off from the application and make available only when necessary. This means anything you create will stay in the function and not affect any other part of the codebase. Here's an example:
+
+```jsx
+let score = 0
+
+function outerFn() {
+  let score = 10
+  function innerFn() {
+    return score
+  }
+  return innerFn()
+}
+```
+
+We create a variable called `score` and assign it a value of `0`. We then create another variable called `score` inside the `outer()` function and give it the value of `10`. At this point, we might be a bit tied up! What is the value of `score`?! Is it `0` or `10`.
+
+The answer depends on what part of the code is being run. If we're outside; in the global space, `score` will be `0`, but if we're inside the `outerFn()` function, `score` will be `10`. The `score` declared outside `outerFn()` would still be accessible by the way, but we've declared a new `score` variable, so to `outerFn()`, `score` is now `10`.
+
+## A visualisation of encapsulation
+
+![Context](/static/images/context.png)
+
+### Persistence
+
+Another thing closures are great for is persistence. This can be called many things; state, cache etc. But they all mean the same thing; you can give your functions memories!
+
+Let's see it in action:
+
+We'll create an outer function again, create a variable `count` and increment that value each time the inner function is called. Finally, we return the inner function, so we have access to the value.
+
+```jsx
+function outsideCount() {
+  let count = 0
+  function insideCount() {
+    count++
+    return count
+  }
+  return insideCount
+}
+```
+
+Next we create a new instance of `outerCount`, (this is how we persist the value)
+
+```jsx
+const outer = outsideCount()
+```
+
+Now we call `outer` and each time it's called, `count` increments. Cool aye!
+
+```jsx
+console.log(outer()) // 1
+console.log(outer()) // 2
+console.log(outer()) // 3
+```
+
+### Memoization
+
+A good use case for this is caching values, or memoization. Memoization is the technique of storing the value of an expensive function call, memorising it and if the inputs to the function are the same, return the stored value instead of running the expensive function again.
+
+## A visualisation of memoization
+
+![Context](/static/images/memo.png)
+
+In this example, a calculator acts as the memoized function. It _stores_ the results of values passed to it. If it's called with inputs that it's received before, it doesn't do any computation and just returns the stored value.
+
+Here's an example:
+
+Say we have an expensive function:
+
+```jsx
+function addUp(x, y) {
+  // lets pretend some heavy
+  // computation goes on here
+  return x + y
+}
+```
+
+To optimise this, instead of running the function every time it's called, we can create a memo function that just returns the returned value if the inputs are the same.
+
+Here's a dumb, in no way battle tested version of one:
+
+```jsx
+function cache(func) {
+  let cacheObj = {}
+
+  return function (...args) {
+    let itemKey = JSON.stringify(args)
+    if (itemKey in cacheObj) {
+      console.log('in cache')
+      return cacheObj[itemKey]
+    } else {
+      console.log('calculating...')
+      let result = func(...args)
+      cacheObj[itemKey] = result
+      return result
+    }
+  }
+}
+```
+
+What we are doing here is fairly simple when you drill down. Let's take it step by step:
+
+We create a function called `cache()` which has the parameter `func`. `func` will be the heavy computation function that you want to memoize.
+
+```jsx
+function cache(func) {} // func is the heavy computation function
+```
+
+Next we create an empty object where we will store our `func` parameters as keys and returned values as values. Once called again, if the parameters are the same, the cache function will return the value of whatever is in `cacheObj`.
+
+```jsx
+function cache(func) {
+  let cacheObj = {}
+}
+```
+
+Btw the eventual `cacheObj` will look something like this when it's full of stored data:
+
+```jsx
+/**
+  {
+    '[10,20]': 200,
+    '[5,5]': 25,
+    '[7,7]': 49,
+  }
+*/
+```
+
+Next, we return a function that takes the spread arguments of the expensive function:
+
+```jsx
+function cache(func) {
+  let cacheObj = {}
+
+  return function (...args) {}
+}
+```
+
+If we `console.log(args)` for the "expensive" `addUp()` function, with the arguments `10` and `20` we will get:
+
+```jsx
+// [ 10, 20 ]
+```
+
+An easy way to store this as a key that we can look up later is to use [`JSON.stringify`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify).
+
+```jsx
+function cache(func) {
+  let cacheObj = {}
+
+  return function (...args) {
+    let itemKey = JSON.stringify(args)
+  }
+}
+```
+
+(`itemKey` would be):
+
+```jsx
+// '[10,20]'
+```
+
+Next, we simply check if the value is stored in the `cacheObj`. If it isn't, we compute the expensive function, store the inputs in `cacheObj` and return the value. If it is, we _don't_ recompute and just return the stored value.
+
+```jsx
+if (itemKey in cacheObj) {
+  console.log('in cache')
+  return cacheObj[itemKey]
+} else {
+  console.log('calculating...')
+  let result = func(...args)
+  cacheObj[itemKey] = result
+  return result
+}
+```

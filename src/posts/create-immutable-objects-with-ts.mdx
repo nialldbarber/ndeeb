@@ -1,0 +1,188 @@
+---
+title: Immutable objects with TypeScript
+date: '2022-01-14'
+tags: ['typescript']
+subtitle: Creating Immutable structures with TypeScript!
+---
+
+## Problem?
+
+If we want to make sure our variables are immutable, we generally reach for `const` to make sure it's value can't be changed. This works great for primitive types such as strings, numbers etc, but not for non-primitive types like arrays and objects.
+
+For instance, this code will result in an error:
+
+```js
+const milesToWalk = 500
+
+milesToWalk = 1_000_000
+
+// => ❌ Uncaught TypeError: Assignment to constant variable.
+```
+
+We'd also get an error if we tried to change the value of an object:
+
+```js
+const milesToWalk = {
+  whoWouldWalkIt: 'i!',
+}
+
+milesToWalk = 'not me!'
+
+// => ❌ Uncaught TypeError: Assignment to constant variable.
+```
+
+But! We can change a value within an object:
+
+```js
+const milesToWalk = {
+  whoWouldWalkIt: 'i!',
+}
+
+milesToWalk.whoWouldWalkIt = 'not me!'
+
+console.log(milesToWalk) // => ✅ {whoWouldWalkIt: 'not me!'}
+```
+
+## Solution
+
+With TypeScript, we can make our non-primitive types immutable by using a _`const` assertion_. It's essentially a way to turn our data in types and to make them immutable:
+
+```ts
+const milesToWalk = {
+  whoWouldWalkIt: 'i!',
+} as const
+
+milesToWalk.whoWouldWalkIt = 'not me!'
+
+// ==> ❌ Cannot assign to 'whoWouldWalkIt'
+//        because it is a read-only property.
+```
+
+You can also achieve this with the `readonly` keyword with TypeScript:
+
+```ts
+type MilesToWalk = {
+  readonly whoWouldWalkIt: string
+}
+
+const milesToWalk: MilesToWalk = {
+  whoWouldWalkIt: 'i!',
+}
+
+milesToWalk.whoWouldWalkIt = 'not me!'
+
+// ==> ❌ Cannot assign to 'whoWouldWalkIt'
+//        because it is a read-only property.
+```
+
+## Useful?
+
+Why is this useful? Well there are times when building your application, you may need to create values that must _never_ change. Usually, we just create an object and hope no one updates it. For instance, let's say we're creating a design system and need to make a list of sizes:
+
+```jsx
+const fontSizes = {
+  xsm: '12px',
+  sm: '14px',
+  md: '16px',
+  lg: '18px',
+  xl: '20px',
+}
+```
+
+Ideally, we don't want this data to change unless we come in and change it ourselves. But what if someone accidentally changes a value?:
+
+```jsx
+import { fontSizes } from '~/app/styles/system'
+
+function imBeingABitCareless() {
+  let { sm, md, lg } = fontSizes
+  // for whatever reason you do:
+  lg = '50px'
+  // ... etc
+}
+```
+
+Not ideal. Let's just make our design system immutable with TypeScript!:
+
+```ts
+const fontSizes = {
+  xxsm: '12px',
+  sm: '14px',
+  md: '16px',
+  lg: '18px',
+  xxl: '20px',
+} as const
+
+let { sm, md, lg } = fontSizes
+lg = '50px'
+
+// => ❌ Type '"50px"' is not assignable to type '"18px"'.
+```
+
+## Caveats
+
+You might've noticed that whilst the `readonly` keyword works on primitive types, it doesn't quite work the same for non-primitive types. As you might imagine, this will produce an error:
+
+```ts
+type Prices = {
+  readonly base: number[]
+}
+
+const priceList: Prices = {
+  base: [4.99, 10, 40, 7.3],
+}
+
+priceList.base = 'gimme gimme'
+
+// => ❌ Cannot assign to 'base' because it is a read-only property.
+```
+
+But we can mutate the array with no errors:
+
+```ts
+type Prices = {
+  readonly base: number[]
+}
+
+const priceList: Prices = {
+  base: [4.99, 10, 40, 7.3],
+}
+
+priceList.base.push(20)
+console.log(priceList) // => ✅ all good!
+// [4.99, 10, 40, 7.3, 20]
+```
+
+So, with arrays we can either use `ReadonlyArray` or place `readonly` before the type:
+
+Option 1):
+
+```ts
+type Prices = {
+  base: ReadonlyArray<number>
+}
+```
+
+Option 2):
+
+```ts
+type Prices = {
+  base: readonly number[]
+}
+```
+
+As with most things in TypeScript, it all comes down to personal preference, but both are valid:
+
+```ts
+type Prices = {
+  base: readonly number[]
+}
+
+const priceList: Prices = {
+  base: [4.99, 10, 40, 7.3],
+}
+
+priceList.base.push(20)
+// ==> ❌ Property 'push' does not exist on
+//        type 'readonly number[]'.
+```

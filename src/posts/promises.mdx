@@ -1,0 +1,127 @@
+---
+title: Promises
+date: '2022-01-05'
+tags: ['javascript']
+subtitle: A visual guide to JavaScript Promises
+---
+
+A Promise is a JavaScript object that represents a task that has yet to be completed. That task is _asynchronous_ and can either be successful or not. What does that mean in plain English?
+
+## Mental Model
+
+A promise is exactly what it sounds like: _"I promise to..."_. You can think of a promise as an I.O.U. Or for a specific example, you could think of a promise much like buying a lottery ticket. The process being; you buy a ticket and you're guaranteed a result back (whether that's good or bad!).
+
+![Promise](/static/images/promise.png)
+
+A promise has three internal states, of which two must process. They are:
+
+- `pending`
+- `fulfilled`
+- `rejected`
+
+#### Pending ⌛
+
+This is the state you always begin with; the process has not been fulfilled or been swiftly rejected! In our example of the lottery ticket, you could see this state as yourself (the ticket holder), waiting to see if your numbers get you the jackpot. When we're in the pending state, the result will be undefined. Which is perfectly understandable because nothing has actually happened yet!
+
+#### Fulfilled ✅
+
+Fulfilled, the state we ideally want our process to end with. This happens when our operation is successful. In our example you can see this as you winning the jackpot (bad example I know, like that would happen!). When the promise is fulfilled, the result will be whatever value is returned.
+
+#### Rejected ❌
+
+This is the state we get when something in our process fails; the operation has not succeeded. Aka your numbers have (yet again) failed to win you the jackpot. When our promise fails and is rejected, the result will be an error object.
+
+### Example
+
+So now we've got a fair understanding of what a promise is, let's see a quick example of one:
+
+```jsx
+let promise = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('success!')
+  }, 2000)
+})
+```
+
+In the example above, we create a promise (the variable name is optional of course). The function that is passed to the promise is called an _executor_, i.e. it _executes_ the code passed to it. This code runs as soon as it's called but will only return once it's fulfilled or rejected. So in our example, this code is the news of whether you've won or lost the jackpot.
+
+The executor function takes two arguments by default: `resolve` and `reject`:
+
+```jsx
+let promise = new Promise((resolve, reject) => {
+```
+
+If the promise is fulfilled then `resolve` is called and the value returned:
+
+```jsx
+resolve('success!')
+```
+
+If the promise is rejected then an error has occured and `reject` will be called, with the error being an `Error` object.
+
+```jsx
+reject(new Error('...crap!'))
+```
+
+## Interacting with promises
+
+There are three methods for interacting with promises:
+
+#### Then
+
+This method is run if the executing code runs successfully and is _resolved_. We access it using the `.then()` function:
+
+```jsx
+let promise = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    resolve('success!')
+  }, 2000)
+})
+
+promise.then((result) => console.log(result))
+// => Promise {<pending>}
+// waiting for 2 seconds...
+// => success!
+```
+
+#### Catch
+
+If we want to check for errors (and we do!), we'll want to add a `.catch()` to intercept where our code has failed. If our code is rejected then `.then()` is skipped and `.catch()` is run instead:
+
+```jsx
+let promise = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    reject('uh oh! failed...')
+  }, 2000)
+})
+
+promise
+  .then((result) => {
+    console.log(result)
+  })
+  .catch((err) => {
+    console.log(err)
+    throw err
+  })
+// => uh oh! failed...
+// => Promise {<fulfilled>: undefined}
+// => Uncaught (in promise) uh oh! failed...
+```
+
+Here we can see that our promise was successfully called (fulfilled), but ended with an error `undefined`. I also made sure to `throw` an error in our catch block, as the program would continue without it. Omitting a `throw` is known as "swallowing" your errors. We don't want that! We want to know when our code is not working, so we `throw`.
+
+#### Finally
+
+A proxy for a value not yet known
+
+Any error thrown in our fulfillment handler, will be turned into a rejected promise. Which will be caught by our rejection handler (catch)
+
+So promises can be fetched in parallel, you can use Promise.all([]). This was, promises don't rely on the other finishing and can be fetched in parallel, meaning much quicker!
+
+All promises must be fulfilled for the Promise from Promise.all([]) to be resolved. Otherwise it's rejected
+
+Promise.allSettled returns a new promise, settles once all promises have settled. I.e. once they are no longer pending
+
+The return value of this is an array of the settled promises
+
+Async/await: the await operator pauses the function exection until the promise has been settled. When the promise has been fulfilled the await value, takes on the value that was resolved

@@ -1,0 +1,236 @@
+---
+title: Array methods
+date: '2022-01-02'
+tags: ['javascript']
+subtitle: Mental models for array methods
+---
+
+<ul>
+  <li>
+    <a href="#filter">Filter</a>
+  </li>
+  <li>
+    <a href="#map">Map</a>
+  </li>
+  <li>
+    <a href="#reduce">Reduce</a>
+  </li>
+  <li>
+    <a href="#concat">Concat</a>
+  </li>
+</ul>
+
+I usually learn best by creating strong mental models. These are images you think of when breaking down a concept that can be difficult to grasp. I learnt a lot of mental models from [Dan Abramov's Just JavaScript](https://justjavascript.com/); my favourite one was thinking of variables as wires pointing to a value.
+
+Here's a short and sweet list of my own mental models for array methods.
+
+<h1 id="filter">Filter</h1>
+
+### Definition
+
+[`Array.prototype.filter()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter) is a method that takes a callback as it's argument and returns a new array based on the callback's logic. It also takes two other arguments: the current index and the array you are mapping over.
+
+### Examples
+
+A simple example is to only return values that are even:
+
+```jsx
+let arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+let newArr = arr.filter((num) => num % 2 === 0)
+console.log(newArr) // => [2, 4, 6, 8, 10]
+```
+
+Or, let's say we're giving out bonuses to employees that have worked at the company for 5 or more years:
+
+```jsx
+let employees = [
+  { name: 'Charlie', years: 4 },
+  { name: 'Dennis', years: 7 },
+  { name: 'Mac', years: 6 },
+  { name: 'Dee', years: 7 },
+  { name: 'Frank', years: 2 },
+]
+
+let bonuses = employees.filter((employee) => employee.years >= 5)
+
+console.log(bonuses) // =>
+// [
+//   { name: "Dennis", years: 7 },
+//   { name: "Mac", years: 6 },
+//   { name: "Dee", years: 7 }
+// ]
+```
+
+Ok, so we have a definition and an example, let's see the mental model:
+
+### Mental model
+
+![Filter](/static/images/filter.png)
+
+My mental model for the `.filter()` method is searching for gold, aka gold panning. I remember when I was younger, our family went to Legoland. One of the first things you do as you enter the theme park was panning for gold; you were given a pan to filter out the sand and keep the gold. I see `.filter()` like this: you filter _out_ values you don't want (in
+this case sand), and keep the values you want (gold pieces).
+
+---
+
+<h1 id="map">Map</h1>
+
+### Definition
+
+[`Array.prototype.map()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map) is a method that takes a callback as its first argument, which does something to each element of the array. It also has two more arguments: the index and the array.
+
+### Examples
+
+The most common example you'll see of `.map()` is to double each element in an array:
+
+```jsx
+let arr = [2, 4, 6, 8]
+let doubled = arr.filter((num) => num * 2)
+console.log(doubled) // => [4, 8, 12, 16]
+```
+
+How about we have a spreadsheet of numbers that we need to format into numbers:
+
+```jsx
+let spreadsheet = `1239
+7533
+4622
+9385
+2755`
+let arr = spreadsheet.split('\n').map(Number)
+console.log(arr) // => [1239, 7533, 4622, 9385, 2755]
+```
+
+So we're essentially always doing something to each element in the array. Let's see the mental model:
+
+### Mental model
+
+![Map](/static/images/map.png)
+
+My `.map()` mental model is a conveyor belt, stamping each item that comes along. The stamper is the callback function, and each item on the belt is each item we want to map over. All items go through the process and will later be shipped off, and in our case they'll be shipped off to a new array.
+
+---
+
+<h1 id="reduce">Reduce</h1>
+
+### Definition
+
+[`Array.prototype.reduce()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce) is slightly different from `.filter()` and `.map()`. It takes a callback as it's first argument, but that callback must have a previous value and current value as it's arguments. Like the other methods, though, it also takes the current index and array as it's last two arguments. The outcome of reduce, is to _reduce_ a bunch of values down to one value (this doesn't have to be a primitive value, it can be another object or array etc).
+
+As with most things, it's probably best to see a few examples of how it works. (this particular method was quite hard to grasp when I first learnt it!)
+
+### Examples
+
+The most common example for `.reduce()` is to find the total sum of an array:
+
+```jsx
+let arr = [2, 4, 6, 8]
+let total = arr.reduce((acc, curr) => acc + curr, 0)
+console.log(total) // => 20
+```
+
+In this example, the callback function has two arguments: `acc` and `curr`. These are just the first two (arbitrary names) for the running total and the current item we are iterating over. The second argument is the initial value we start with, in this case `0`.
+
+The process of the `.reduce()` above goes as follows:
+
+```
+Start
+`acc` aka the running total is `0` as we gave it an initial value
+we add `0 + curr` which is `2`
+on first loop, our running total is now `2`
+
+...this is repeated until we reach the end of the array
+
+`acc` is `20`
+End
+```
+
+There are so many cool things you can do with `.reduce()` that are not just reducing an array down to a single value. I recently saw an example from James Sinclair who detailed a list of fun things you can do with `.reduce()`. [Check that out here, btw](https://jrsinclair.com/articles/2019/functional-js-do-more-with-reduce/).
+
+One brilliant example was converting an array of objects into a object. This can be useful if you want to create a lookup table, for instance. Let's use our employee array from before and convert it to an object:
+
+```jsx
+let employees = [
+  { name: 'Charlie', years: 4 },
+  { name: 'Dennis', years: 7 },
+  { name: 'Mac', years: 6 },
+  { name: 'Dee', years: 7 },
+  { name: 'Frank', years: 2 },
+]
+
+let employeesObj = employees.reduce((acc, curr) => {
+  return {
+    ...acc,
+    [curr.name]: curr,
+  }
+}, {})
+
+console.log(employeesObj) // =>
+// {
+//   Charlie: { name: 'Charlie', years: 4 },
+//   Dennis: { name: 'Dennis', years: 7 },
+//   Mac: { name: 'Mac', years: 6 },
+//   Dee: { name: 'Dee', years: 7 },
+//   Frank: { name: 'Frank', years: 2 }
+// }
+```
+
+In the example above, we start with an initial value of an empty object. We then loop over the `employees` array and spread each new item into the eventual return value of `employeesObj`. From that we are using the employee's name as the key for the new object.
+
+Even in the last example, we're still essentially boiling an array down to a new value (it just so happens that this example is an object!). Let's check out the mental model for this:
+
+### Mental model
+
+![Reduce](/static/images/reduce.png)
+
+This mental model is a sand castle; a final piece that is made from many pieces. A final product, if you will. The castle acts as the final returned value and also the accumulator value. Each piece of sand you add to the castle acts as the current value that you're adding to the total value.
+
+---
+
+<h1 id="concat">Concat</h1>
+
+### Definition
+
+[`Array.prototype.concat()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat) is an array method that essentially glues together two (or more) arrays. It does this by merging them together and creating a new array.
+
+### Examples
+
+A good use case for using `concat()` is to merge two arrays together:
+
+```jsx
+let fruit = ['apple', 'orange', 'kiwi']
+let veg = ['broccoli', 'sprouts']
+let fiveADay = fruit.concat(veg)
+console.log(fiveADay) // => ['apple', 'orange', 'kiwi', 'broccoli', 'sprouts']
+```
+
+Pretty simple! Now, lets say you need to add a new user to a database. `.concat()` would be a perfect candidate for that:
+
+```jsx
+let db = [
+  // ...long list of users
+]
+
+let newUser = {
+  name: 'Niall',
+  age: 31,
+  jobTitle: 'Software Engineer',
+}
+
+let updatedDb = db.concat(newUser)
+
+console.log(updatedDb) // =>
+// [
+//   ...long list of users
+//   {
+//     name: "Niall",
+//     age: 31,
+//     jobTitle: "Software Engineer"
+//   }
+// ]
+```
+
+### Mental model
+
+![Concat](/static/images/concat.png)
+
+My mental model for `.concat()` is (I'll admit), a little dumb, but it works for me! I see `.concat()` as a long train set and the original array (the train) is running along, with new carriages being added to it as it stops at train stations. Each new carriage is a new array that needs to be added to the original array (again, the train).

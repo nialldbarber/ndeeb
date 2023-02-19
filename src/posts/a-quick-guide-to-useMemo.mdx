@@ -1,0 +1,95 @@
+---
+title: useMemo
+date: '2021-12-31'
+tags: ['react', 'javascript']
+subtitle: A visual guide to useMemo
+---
+
+## TL;DR, show me the code!
+
+```jsx
+const memoizedExpensiveFn = useMemo(() => {
+  return reallyExpensiveFnValue(a, b)
+}, [a, b])
+```
+
+A good rule of thumb with `useMemo` is to just not use it 😛 No that's a lie, but it's quite rarely actually needed. You should only use it when you notice your application become sluggish and slow. Only then should you use it. Using it when it's not needed is an over-optimisation.
+
+If you read [my other post on closures](https://www.niallb.codes/blog/closures), you'll probably already have an idea what `useMemo` does. But for the uninitiated, follow on!
+
+## All the renders!
+
+The first thing we need to understand is that a React component re-renders a lot! A component re-renders when a) state changes or b) props change. Let's look at a quick example of this:
+
+Let's say we have that crazy expensive function:
+
+```jsx
+function someExpensiveFn(x) {
+  console.log('thinking...')
+  // a gazillion http requests here?
+  // 🤷‍♂️ i don't know, something expensive!
+  return x * 2
+}
+```
+
+Ok, now let's imagine we have a parent and child component. The child component receives a `num` prop which it then uses to calculate the expensive function call `someExpensiveFn()`.
+
+```jsx
+function Child({ num }) {
+  const getDoubledValue = someExpensiveFn(num)
+  return <p>{getDoubledValue}</p>
+}
+```
+
+The parent component is in charge of providing that prop and does it like so:
+
+```jsx
+function Parent() {
+  const [num, setNum] = useState(5)
+  const [confirmNum, setConfirmNum] = useState(0)
+
+  return (
+    <>
+      <input value={num} onChange={(e) => setNum(e.target.value)} />
+      <button onClick={() => setConfirmNum(num)}>Confirm</button>
+      <Child num={confirmNum} />
+    </>
+  )
+}
+```
+
+The problem is that `someExpensiveFn()` is called _every_ time `num` updates, even if the value doesn't change. This means that we'll see some lag each time this operation is performed.
+
+## Problem solved!
+
+Luckily, there is a way to fix this; a built-in React hook called `useMemo`.
+
+Here's my quick mental model for `useMemo`:
+
+![UseMemo](/static/images/useMemo.png)
+
+`useMemo` takes a function callback as it's argument and a dependency array. It recomputes only _if_ one of the dependencies has changed. If a dependency hasn't changed, it returns the stored value from a previous call.
+
+Here's our updated code to include `useMemo`:
+
+```jsx
+function Child({ num }) {
+  const getDoubledValue = useMemo(() => someExpensiveFn(num), [num])
+  return <p>{getDoubledValue}</p>
+}
+
+function Parent() {
+  const [num, setNum] = useState(5)
+  const [confirmNum, setConfirmNum] = useState(0)
+
+  return (
+    <>
+      <input value={num} onChange={(e) => setNum(e.target.value)} />
+      <button onClick={() => setConfirmNum(num)}>Confirm</button>
+      <Child num={confirmNum} />
+    </>
+  )
+}
+```
+
+Note there's a distinction between a _component_ re-rendering and a _function_ being created or run. `useMemo` does not stop a component itself from re-rendering, only the function.

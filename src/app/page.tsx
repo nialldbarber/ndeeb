@@ -1,6 +1,6 @@
 import styles from '@/app/page.module.css'
 import getPostMetaData from '@/libs/posts'
-import PostPreview from './components/post-preview'
+import PostPreview from '@/app/components/post-preview'
 
 const Home = () => {
   const posts = getPostMetaData()

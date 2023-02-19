@@ -1,6 +1,8 @@
 import { Header } from '@/app/components/header'
 import { Footer } from '@/app/components/footer'
 import '@/app/globals.css'
+import '../styles/github-dark.min.css'
+import 'highlight.js/styles/default.css'
 
 type RootLayoutProps = {
   children: React.ReactNode
